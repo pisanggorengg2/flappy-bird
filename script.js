@@ -1,39 +1,56 @@
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-let bird = {
-  x: 50,
-  y: 150,
-  width: 20,
-  height: 20,
-  gravity: 0.5,
-  lift: -8,
-  velocity: 0
-};
+let bird;
+let pipes;
+let score;
+let game;
+let gameRunning;
 
-let pipes = [];
-let score = 0;
+function init() {
+  bird = {
+    x: 50,
+    y: 150,
+    width: 20,
+    height: 20,
+    gravity: 0.5,
+    lift: -8,
+    velocity: 0
+  };
 
-// kontrol
-document.addEventListener("keydown", () => {
-  bird.velocity = bird.lift;
+  pipes = [];
+  score = 0;
+  gameRunning = true;
+
+  document.getElementById("score").textContent = score;
+  document.getElementById("restartBtn").style.display = "none";
+}
+
+// kontrol (lompat)
+document.addEventListener("keydown", (e) => {
+  if (gameRunning && e.code === "Space") {
+    bird.velocity = bird.lift;
+  }
 });
 
+// gambar burung (kotak)
 function drawBird() {
   ctx.fillStyle = "yellow";
   ctx.fillRect(bird.x, bird.y, bird.width, bird.height);
 }
 
+// update posisi burung
 function updateBird() {
   bird.velocity += bird.gravity;
   bird.y += bird.velocity;
 
-  // jatuh ke bawah = game over
+  // jatuh = game over
   if (bird.y + bird.height > canvas.height) {
     gameOver();
   }
 }
 
+// bikin pipa
 function createPipe() {
   let topHeight = Math.random() * 300;
   let gap = 120;
@@ -46,16 +63,16 @@ function createPipe() {
   });
 }
 
+// gambar pipa
 function drawPipes() {
   ctx.fillStyle = "green";
   pipes.forEach(pipe => {
-    // atas
     ctx.fillRect(pipe.x, 0, 40, pipe.top);
-    // bawah
     ctx.fillRect(pipe.x, canvas.height - pipe.bottom, 40, pipe.bottom);
   });
 }
 
+// update pipa
 function updatePipes() {
   pipes.forEach(pipe => {
     pipe.x -= 2;
@@ -78,16 +95,27 @@ function updatePipes() {
     }
   });
 
-  // hapus pipe keluar layar
   pipes = pipes.filter(pipe => pipe.x > -40);
 }
 
+// game over
 function gameOver() {
+  gameRunning = false;
   clearInterval(game);
-  alert("Game Over! Score: " + score);
+  document.getElementById("restartBtn").style.display = "inline-block";
 }
 
+// restart
+function restartGame() {
+  clearInterval(game);
+  init();
+  game = setInterval(draw, 20);
+}
+
+// loop
 function draw() {
+  if (!gameRunning) return;
+
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   drawBird();
@@ -97,8 +125,11 @@ function draw() {
   updatePipes();
 }
 
-// loop game
-const game = setInterval(draw, 20);
+// start awal
+init();
+game = setInterval(draw, 20);
 
-// spawn pipe tiap 2 detik
-setInterval(createPipe, 2000);
+// spawn pipa
+setInterval(() => {
+  if (gameRunning) createPipe();
+}, 2000);
