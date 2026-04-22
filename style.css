@@ -10,10 +10,3 @@ canvas {
   margin: 20px auto;
   border: 2px solid #000;
 }
-
-#restartBtn {
-  display: none;
-  padding: 10px 20px;
-  font-size: 16px;
-  cursor: pointer;
-}
